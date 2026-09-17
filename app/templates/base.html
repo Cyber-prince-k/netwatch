@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ request.app.title }} | {% block title %}Operations{% endblock %}</title>
+  <link href="/static/app.css" rel="stylesheet">
+  <link href="/static/theme.css?v=3" rel="stylesheet">
+</head>
+<body>
+  <div class="ambient-grid" aria-hidden="true"></div>
+  <nav class="topbar">
+    <a class="brand-mark" href="/"><span class="signal-dot"></span> NETWATCH <small>ENTERPRISE</small></a>
+    <div class="topbar-meta"><span class="live-dot" id="connectionDot"></span><span id="connectionLabel">Live fabric view</span><span class="divider"></span> {{ overview.assets_total }} monitored assets</div>
+  </nav>
+  <div class="app-frame">
+    <aside class="side-nav" aria-label="Primary navigation">
+      <p class="nav-caption">Workspace</p>
+      <a class="nav-item {% if request.url.path == '/' %}active{% endif %}" href="/"><span>◈</span> Overview</a>
+      <a class="nav-item {% if request.url.path == '/inventory' %}active{% endif %}" href="/inventory"><span>▦</span> Inventory</a>
+      <a class="nav-item {% if request.url.path == '/alerts' %}active{% endif %}" href="/alerts"><span>◌</span> Alerts <b>{{ overview.alerts_open }}</b></a>
+      <a class="nav-item {% if request.url.path == '/checks' %}active{% endif %}" href="/checks"><span>⌁</span> Checks</a>
+      <p class="nav-caption nav-caption-spaced">Intelligence</p>
+      <a class="nav-item {% if request.url.path == '/reports' %}active{% endif %}" href="/reports"><span>▤</span> Reports</a>
+      <a class="nav-item {% if request.url.path == '/settings' %}active{% endif %}" href="/settings"><span>⚙</span> Settings</a>
+      <div class="collector-status"><span class="live-dot"></span><div><strong>Collector online</strong><small>central-collector</small></div></div>
+    </aside>
+    <div class="content-wrap">{% block content %}{% endblock %}</div>
+  </div>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

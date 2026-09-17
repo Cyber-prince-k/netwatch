@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block title %}Inventory{% endblock %}
+{% block content %}
+<main class="page-content inner-page">
+  <header class="page-heading"><div><p class="eyebrow">Workspace / Inventory</p><h1>Monitored inventory</h1><p class="subtitle">Every site, service, and network device in the current monitoring scope.</p></div><a class="refresh-button" href="/docs">API reference <span>→</span></a></header>
+  <section class="panel data-panel"><div class="panel-heading"><div><p class="eyebrow">{{ assets|length }} assets registered</p><h2>Asset register</h2></div><span class="status-pill">Live inventory</span></div><div class="table-responsive"><table class="table align-middle"><thead><tr><th>Asset</th><th>Type</th><th>Site</th><th>Status</th><th>Tags</th></tr></thead><tbody>{% for asset in assets %}<tr><td><span class="asset-name">{{ asset.name }}</span><span class="asset-host">{{ asset.hostname }}</span></td><td>{{ asset.asset_type }}</td><td>Site {{ asset.site_id }}</td><td><span class="status-tag status-{{ asset.status }}">{{ asset.status }}</span></td><td class="asset-tags">{{ asset.tags|join(' · ') }}</td></tr>{% endfor %}</tbody></table></div></section>
+</main>
+{% endblock %}

@@ -1,0 +1,25 @@
+services:
+  db:
+    image: timescale/timescaledb:latest-pg16
+    environment:
+      POSTGRES_DB: netwatch
+      POSTGRES_USER: netwatch
+      POSTGRES_PASSWORD: netwatch
+    ports:
+      - "5432:5432"
+    volumes:
+      - timescale_data:/var/lib/postgresql/data
+      - ./infra/timescaledb/init.sql:/docker-entrypoint-initdb.d/01-netwatch.sql:ro
+
+  app:
+    build: .
+    environment:
+      DATABASE_URL: postgresql+asyncpg://netwatch:netwatch@db:5432/netwatch
+      SECRET_KEY: replace-in-production
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+
+volumes:
+  timescale_data:

@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Overview{% endblock %}
+{% block content %}
+  <main class="page-content">
+    <header class="page-heading">
+      <div><p class="eyebrow">Operations control room / Overview</p><h1>Infrastructure pulse <span class="heading-wave">⌁</span></h1><p class="subtitle">A quiet read on availability, latency, and active risk across your estate.</p></div>
+      <div class="command-rail"><span class="last-sync" id="lastSync">Awaiting sync</span><button class="refresh-button" id="refreshButton" aria-label="Refresh dashboard"><span class="button-icon">↻</span> Refresh</button></div>
+    </header>
+    <section class="metric-grid" aria-label="Key metrics">
+      <article class="metric-card accent-cyan"><span class="metric-label">Healthy assets</span><strong data-count="{{ overview.assets_healthy }}">0<small> / {{ overview.assets_total }}</small></strong><span class="metric-note"><i class="trend-up">↑</i> Availability posture</span></article>
+      <article class="metric-card accent-lime"><span class="metric-label">Open alerts</span><strong data-count="{{ overview.alerts_open }}">0</strong><span class="metric-note"><i class="trend-flat">•</i> Needs operator attention</span></article>
+      <article class="metric-card accent-amber"><span class="metric-label">Mean latency</span><strong data-count="{{ overview.average_latency_ms }}">0<small> ms</small></strong><span class="metric-note"><i class="trend-up">↓</i> Across recent checks</span></article>
+      <article class="metric-card accent-coral"><span class="metric-label">Assets down</span><strong data-count="{{ overview.assets_down }}">0</strong><span class="metric-note"><i class="trend-flat">•</i> Current impact</span></article>
+    </section>
+    <section class="workspace-grid">
+      <article class="panel chart-panel"><div class="panel-heading"><div><p class="eyebrow">Telemetry stream <span class="pulse-label">● streaming</span></p><h2>Recent response time</h2></div><span class="status-pill">Last 24 samples</span></div><div class="chart-wrap"><canvas id="latencyChart"></canvas></div></article>
+      <article class="panel alert-panel"><div class="panel-heading"><div><p class="eyebrow">Attention queue</p><h2>Active alerts</h2></div><span class="count-badge">{{ overview.alerts|length }}</span></div>{% if overview.alerts %}<div class="alert-list">{% for alert in overview.alerts %}<div class="alert-row"><span class="severity severity-{{ alert.severity }}"></span><div><strong>{{ alert.title }}</strong><p>{{ alert.message }}</p></div><span class="alert-time">{{ alert.created_at.strftime('%H:%M') if alert.created_at else 'now' }}</span></div>{% endfor %}</div>{% else %}<div class="empty-state"><span>✓</span><p>No active alerts</p><small>All monitored services are within policy.</small></div>{% endif %}</article>
+    </section>
+    <section class="panel inventory-panel"><div class="panel-heading"><div><p class="eyebrow">Inventory / All sites</p><h2>Monitored assets</h2></div><div class="panel-actions"><span class="asset-filter">● All systems</span><a href="/docs" class="api-link">Open API reference →</a></div></div><div class="table-responsive"><table class="table align-middle"><thead><tr><th>Asset</th><th>Type</th><th>Site</th><th>Status</th><th>Tags</th></tr></thead><tbody id="assetRows"><tr><td colspan="5"><div class="table-loading"><span></span><span></span><span></span> Loading inventory</div></td></tr></tbody></table></div></section>
+  </main>
+  <div class="toast-message" id="toastMessage" role="status" aria-live="polite"></div>
+{% endblock %}
+{% block scripts %}<script src="/static/dashboard.js"></script>{% endblock %}

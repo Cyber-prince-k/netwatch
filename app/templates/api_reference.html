@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}API Reference{% endblock %}
+{% block content %}
+<main class="page-content inner-page">
+  <header class="page-heading"><div><p class="eyebrow">Developer workspace / API reference</p><h1>NetWatch API</h1><p class="subtitle">Operational endpoints for inventory, checks, alerts, telemetry, and collectors.</p></div><a class="refresh-button" href="/swagger">Open API console <span>↗</span></a></header>
+  <section class="panel data-panel"><div class="panel-heading"><div><p class="eyebrow">{{ endpoints|length }} routes available</p><h2>Endpoint catalog</h2></div><span class="status-pill">Version 0.1.0</span></div><div class="endpoint-list">{% for method, path, description in endpoints %}<a class="endpoint-row" href="{{ '/api-view?path=' ~ (path|urlencode) if method == 'GET' else '/swagger-ui' }}"><span class="method method-{{ method|lower }}">{{ method }}</span><code>{{ path }}</code><span class="endpoint-description">{{ description }}</span><span class="endpoint-arrow">→</span></a>{% endfor %}</div></section>
+  <section class="api-note"><span class="report-icon">i</span><div><strong>Need interactive request tools?</strong><p>Open the NetWatch API console at <a href="/swagger">/swagger</a>. The underlying OpenAPI tool remains available at <a href="/swagger-ui">/swagger-ui</a>.</p></div></section>
+</main>
+{% endblock %}

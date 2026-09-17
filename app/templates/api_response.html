@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}API Response{% endblock %}
+{% block content %}
+<main class="page-content inner-page">
+  <header class="page-heading"><div><p class="eyebrow">Developer workspace / API response</p><h1>Response viewer</h1><p class="subtitle">The endpoint result is presented inside the NetWatch workspace instead of leaving the application.</p></div><a class="refresh-button" href="/swagger">Back to API console <span>←</span></a></header>
+  <section class="console-toolbar"><div><span class="console-pulse"></span><strong>200 OK · Request completed</strong><small>{{ endpoint_path }}</small></div><span class="status-pill">application/json</span></section>
+  <section class="panel response-panel"><div class="panel-heading"><div><p class="eyebrow">Response payload</p><h2>{{ endpoint_path }}</h2></div><button class="secondary-button" id="copyResponse" type="button">Copy JSON <span>⧉</span></button></div><pre id="responsePayload" class="json-payload">{{ payload_json }}</pre></section>
+</main>
+{% endblock %}
+{% block scripts %}<script>
+document.querySelector('#copyResponse').addEventListener('click', async () => {
+  await navigator.clipboard.writeText(document.querySelector('#responsePayload').textContent);
+  document.querySelector('#copyResponse').textContent = 'Copied';
+  window.setTimeout(() => { document.querySelector('#copyResponse').innerHTML = 'Copy JSON <span>⧉</span>'; }, 1600);
+});
+</script>{% endblock %}
