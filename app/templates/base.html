@@ -11,7 +11,7 @@
   <div class="ambient-grid" aria-hidden="true"></div>
   <nav class="topbar">
     <a class="brand-mark" href="/"><span class="signal-dot"></span> NETWATCH <small>ENTERPRISE</small></a>
-    <div class="topbar-meta"><span class="live-dot" id="connectionDot"></span><span id="connectionLabel">Live fabric view</span><span class="divider"></span> {{ overview.assets_total }} monitored assets</div>
+    <div class="topbar-meta"><span class="live-dot" id="connectionDot"></span><span id="connectionLabel">Live fabric view</span><span class="divider"></span> {{ overview.assets_total }} monitored assets {% if current_user %}<span class="divider"></span><a class="account-link" href="/account">{{ current_user.full_name }}</a><a class="logout-link" href="/account/logout">Sign out</a>{% else %}<span class="divider"></span><a class="account-link" href="/account/login">Sign in</a>{% endif %}</div>
   </nav>
   <div class="app-frame">
     <aside class="side-nav" aria-label="Primary navigation">

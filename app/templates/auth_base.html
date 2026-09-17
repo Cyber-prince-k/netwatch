@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ request.app.title }} | {% block title %}Secure Access{% endblock %}</title>
+  <link href="/static/app.css" rel="stylesheet">
+  <link href="/static/theme.css?v=4" rel="stylesheet">
+</head>
+<body class="auth-shell">
+  <div class="ambient-grid" aria-hidden="true"></div>
+  <nav class="topbar">
+    <a class="brand-mark" href="/account/login"><span class="signal-dot"></span> NETWATCH <small>ENTERPRISE</small></a>
+    <div class="topbar-meta"><span class="live-dot"></span> Secure access</div>
+  </nav>
+  <div class="auth-content">{% block content %}{% endblock %}</div>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

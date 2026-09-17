@@ -107,6 +107,23 @@ body {
 .setting-row h2 { font-size: 17px; margin: 0 0 5px; }
 .setting-row p:not(.eyebrow) { font-size: 12px; margin: 0; }
 .toast-message { background: #14282d; color: var(--text); border-color: var(--cyan); }
+.account-link, .logout-link { color: #b8ceca; text-decoration: none; font: 500 11px 'DM Mono', monospace; }
+.logout-link { color: #f29a8b; margin-left: 12px; }
+.auth-page { display: grid; min-height: calc(100vh - 70px); place-items: center; }
+.auth-shell .topbar { position: fixed; top: 0; right: 0; left: 0; }
+.auth-content { min-height: 100vh; padding-top: 70px; }
+.auth-shell .auth-page { min-height: calc(100vh - 70px); }
+.auth-card { width: min(100%, 470px); padding: 32px; }
+.auth-card h1 { margin: 0 0 8px; font-size: 30px; color: var(--text); }
+.account-form { display: grid; gap: 15px; margin-top: 24px; }
+.account-form label { display: grid; gap: 7px; color: #a9c0bc; font: 10px 'DM Mono', monospace; text-transform: uppercase; letter-spacing: .06em; }
+.account-form input { width: 100%; border: 1px solid rgba(153, 205, 196, .18); border-radius: 6px; padding: 11px 12px; outline: none; background: rgba(19, 39, 43, .9); color: var(--text); font: 12px 'DM Mono', monospace; text-transform: none; letter-spacing: 0; }
+.account-form input:focus { border-color: var(--cyan); box-shadow: 0 0 0 3px rgba(84, 210, 207, .1); }
+.account-form small, .field-note { color: #799490; font: 10px 'DM Mono', monospace; text-transform: none; letter-spacing: 0; }
+.auth-footer { margin: 22px 0 0; color: var(--text-soft); font-size: 12px; }.auth-footer a { color: #bdc8ff; }
+.form-error, .form-success { margin-top: 18px; padding: 11px 13px; border-radius: 6px; font: 11px 'DM Mono', monospace; }
+.form-error { color: #ff9f90; background: rgba(240, 125, 107, .12); border: 1px solid rgba(240, 125, 107, .25); }.form-success { color: #b9edc4; background: rgba(93, 169, 118, .12); border: 1px solid rgba(169, 229, 177, .2); }
+.account-header { display: flex; align-items: center; gap: 16px; padding-bottom: 22px; margin-bottom: 8px; border-bottom: 1px solid var(--glass-line); }.account-header h2 { margin: 0 0 4px; }.account-header p:not(.eyebrow) { margin: 0; color: var(--text-soft); font-size: 12px; }.avatar { display: grid; width: 52px; height: 52px; place-items: center; border-radius: 50%; background: rgba(84, 210, 207, .15); color: var(--cyan); border: 1px solid rgba(84, 210, 207, .3); font-size: 21px; }
 
 @keyframes grid-drift { 0% { background-position: 0 0, 0 0, 0 0; } 50% { background-position: 21px 21px, -21px 21px, 42px -42px; } 100% { background-position: 42px 42px, -42px 42px, 84px -84px; } }
 @keyframes grid-scan { 0% { background-position: 0 -220px; } 100% { background-position: 0 calc(100% + 220px); } }

@@ -16,6 +16,7 @@ dependencies = [
   "scikit-learn>=1.5,<2.0",
   "psutil>=6.0,<7.0",
   "python-multipart>=0.0.12,<1.0",
+  "itsdangerous>=2.2,<3.0",
 ]
 
 [project.optional-dependencies]

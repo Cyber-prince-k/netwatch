@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     database_url: str = "sqlite+aiosqlite:///./netwatch.db"
     collector_id: str = "central-collector"
     monitor_interval_seconds: int = 60
+    session_cookie_name: str = "netwatch_session"
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 

@@ -70,6 +70,32 @@ The underlying FastAPI-generated OpenAPI tool. It remains available for schema i
 
 The liveness endpoint used by operators, deployment checks, and container probes. It returns the service status, application name, and current environment.
 
+## Account creation, login, and management
+
+Account workflows are available through the shared interface:
+
+- `/account/register` - create an account with a name, email, and password
+- `/account/login` - authenticate with a signed session cookie
+- `/account` - view account details and update the display name or password
+- `/account/logout` - clear the active session
+
+The dashboard, workspace pages, API console, response viewer, and protected API data require an authenticated session. Anonymous browser requests are redirected to `/account/login`; anonymous API requests return HTTP 401. Registration, login, logout, health checks, and static assets remain available without an authenticated session.
+
+Passwords are never stored directly. `PasswordHasher` encapsulates salted PBKDF2-SHA256 hashing and constant-time verification. `AccountService` owns account creation, profile updates, lookup, and account listing. `AuthenticationService` owns credential verification and login timestamps. Custom `AccountError` and `AuthenticationError` exceptions are caught at the HTTP boundary and converted into user-facing form errors.
+
+## Object-oriented design conventions
+
+NetWatch uses an object-oriented service boundary as the system grows:
+
+- **Encapsulation:** domain operations and sensitive password behavior live inside classes rather than being scattered through routes.
+- **Reuse:** services receive an `AsyncSession` and can be reused by HTML routes, REST endpoints, background jobs, and collectors.
+- **Separation of concerns:** ORM models represent persisted state, schemas validate input, services perform operations, and routes translate HTTP requests and errors.
+- **Inheritance and polymorphism:** use them where a shared monitoring or integration contract genuinely reduces duplication; avoid inheritance only for ceremony.
+- **Error handling:** service operations use explicit `try/except` handling at persistence and integration boundaries, chaining original exceptions where useful. Routes present safe, actionable errors without exposing secrets or internal stack traces.
+- **Testability:** class operations should be small enough to test independently from the browser layer.
+
+New features should follow this structure: model/entity, validated schema, service class, route/controller, template or API response, and focused tests.
+
 ## Technologies used
 
 ### Backend and application runtime

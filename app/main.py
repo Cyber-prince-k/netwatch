@@ -3,13 +3,16 @@ from datetime import datetime, timezone
 import json
 
 from fastapi import Depends, FastAPI, HTTPException, Request
-from fastapi.responses import HTMLResponse
+from fastapi import Form
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from starlette.middleware.sessions import SessionMiddleware
 from sqlalchemy import desc, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import get_settings
+from app.auth import AccountError, AccountService, AuthenticationError, AuthenticationService
 from app.db import SessionLocal, get_session, init_db
 from app.models import Alert, AlertStatus, Asset, Check
 from app.schemas import AssetCreate, AssetView, AlertView, CheckCreate, TelemetryView
@@ -32,20 +35,128 @@ app = FastAPI(title=settings.app_name, version="0.1.0", lifespan=lifespan, docs_
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 
+PUBLIC_PATHS = {
+    "/health",
+    "/account/login",
+    "/account/register",
+    "/account/logout",
+    "/openapi.json",
+    "/swagger-ui",
+    "/redoc",
+}
+
+
+@app.middleware("http")
+async def authentication_gate(request: Request, call_next):
+    path = request.url.path
+    is_static = path.startswith("/static/")
+    is_public = path in PUBLIC_PATHS or path.startswith("/swagger-ui/") or path.startswith("/redoc")
+    requires_auth = not is_static and not is_public and (
+        path == "/" or path.startswith(("/inventory", "/alerts", "/checks", "/reports", "/settings", "/docs", "/swagger", "/api/", "/api-view"))
+    )
+    if requires_auth and not request.session.get("user_id"):
+        if path.startswith("/api/"):
+            return JSONResponse({"detail": "Authentication required"}, status_code=401)
+        return RedirectResponse(url=f"/account/login?next={request.url.path}", status_code=303)
+    return await call_next(request)
+
+
+app.add_middleware(SessionMiddleware, secret_key=settings.secret_key, session_cookie=settings.session_cookie_name, https_only=False)
+
+
 @app.get("/health")
 async def health() -> dict:
     return {"status": "ok", "service": settings.app_name, "environment": settings.environment}
 
 
+def current_user_id(request: Request) -> int | None:
+    return request.session.get("user_id")
+
+
+async def auth_context(request: Request, session: AsyncSession) -> dict:
+    return await page_context(request, session)
+
+
+@app.get("/account/register", response_class=HTMLResponse)
+async def register_page(request: Request, session: AsyncSession = Depends(get_session)):
+    context = await auth_context(request, session)
+    context["error"] = None
+    return templates.TemplateResponse(request, "register.html", context)
+
+
+@app.post("/account/register", response_class=HTMLResponse)
+async def register_account(request: Request, email: str = Form(...), full_name: str = Form(...), password: str = Form(...), session: AsyncSession = Depends(get_session)):
+    context = await auth_context(request, session)
+    try:
+        user = await AccountService(session).create_account(email, full_name, password)
+        request.session["user_id"] = user.id
+        return RedirectResponse("/account", status_code=303)
+    except AccountError as error:
+        context["error"] = str(error)
+        return templates.TemplateResponse(request, "register.html", context, status_code=400)
+
+
+@app.get("/account/login", response_class=HTMLResponse)
+async def login_page(request: Request, session: AsyncSession = Depends(get_session)):
+    context = await auth_context(request, session)
+    context["error"] = None
+    return templates.TemplateResponse(request, "login.html", context)
+
+
+@app.post("/account/login", response_class=HTMLResponse)
+async def login_account(request: Request, email: str = Form(...), password: str = Form(...), session: AsyncSession = Depends(get_session)):
+    context = await auth_context(request, session)
+    try:
+        user = await AuthenticationService(session).authenticate(email, password)
+        request.session["user_id"] = user.id
+        return RedirectResponse("/account", status_code=303)
+    except AuthenticationError as error:
+        context["error"] = str(error)
+        return templates.TemplateResponse(request, "login.html", context, status_code=401)
+
+
+@app.get("/account/logout")
+async def logout_account(request: Request):
+    request.session.clear()
+    return RedirectResponse("/account/login", status_code=303)
+
+
+@app.get("/account", response_class=HTMLResponse)
+async def account_page(request: Request, session: AsyncSession = Depends(get_session)):
+    context = await auth_context(request, session)
+    if not context["current_user"]:
+        return RedirectResponse("/account/login", status_code=303)
+    context["error"] = None
+    return templates.TemplateResponse(request, "account.html", context)
+
+
+@app.post("/account/profile", response_class=HTMLResponse)
+async def update_account(request: Request, full_name: str = Form(...), password: str = Form(""), session: AsyncSession = Depends(get_session)):
+    context = await auth_context(request, session)
+    user = context["current_user"]
+    if not user:
+        return RedirectResponse("/account/login", status_code=303)
+    try:
+        await AccountService(session).update_profile(user, full_name, password or None)
+        context["message"] = "Account updated successfully"
+        context["error"] = None
+    except AccountError as error:
+        context["message"] = None
+        context["error"] = str(error)
+    return templates.TemplateResponse(request, "account.html", context)
+
+
 @app.get("/", response_class=HTMLResponse)
 async def dashboard(request: Request, session: AsyncSession = Depends(get_session)):
-    overview = await dashboard_overview(session)
-    return templates.TemplateResponse(request, "dashboard.html", {"overview": overview})
+    context = await auth_context(request, session)
+    return templates.TemplateResponse(request, "dashboard.html", context)
 
 
 async def page_context(request: Request, session: AsyncSession) -> dict:
     overview = await dashboard_overview(session)
-    return {"request": request, "overview": overview}
+    user_id = current_user_id(request)
+    current_user = await AccountService(session).get_account(user_id) if user_id else None
+    return {"request": request, "overview": overview, "current_user": current_user}
 
 
 @app.get("/inventory", response_class=HTMLResponse)
